@@ -16,6 +16,11 @@ class Board extends Model
         return $this->belongsToMany(User::class, 'board_user');
     }
 
+    public function statuses()
+    {
+        return $this->belongsToMany(Status::class, 'board_status');
+    }
+
     public function tasks()
     {
         return $this->hasMany(Task::class);

@@ -11,6 +11,11 @@ class Status extends Model
 
     protected $fillable = ['name', 'description'];
 
+    public function boards()
+    {
+        return $this->belongsToMany(Board::class, 'board_status');
+    }
+
     public function tasks()
     {
         return $this->hasMany(Task::class);

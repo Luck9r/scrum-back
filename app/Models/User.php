@@ -45,8 +45,23 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            $developerRole = Role::where('name', 'developer')->first();
+            $user->roles()->attach($developerRole);
+        });
+    }
     public function boards()
     {
         return $this->belongsToMany(Board::class, 'board_user');
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
     }
 }
