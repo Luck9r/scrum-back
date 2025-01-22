@@ -87,7 +87,10 @@ class TaskController extends Controller
             'due_date' => $task->due_date,
             'priority' => $task->priority ? $task->priority->name : null,
             'status' => $task->status ? $task->status->name : null,
-            'user' => $task->user ? $task->user->name : null,
+            'creator_name' => $task->creator ? $task->creator->name : null,
+            'assignee_name' => $task->assignee ? $task->assignee->name : null,
+            'creator_id' => $task->creator_id,
+            'assignee_id' => $task->assignee_id,
             'board_id' => $task->board_id,
         ];
 
@@ -114,5 +117,25 @@ class TaskController extends Controller
         });
 
         return response()->json($tasks);
+    }
+
+    public function assignUser(Request $request, $taskId)
+    {
+        $task = Task::query()->findOrFail($taskId);
+        $userId = $request->validate(['user_id' => 'required|exists:users,id'])['user_id'];
+
+        $task->assignee_id = $userId;
+        $task->save();
+
+        return response()->json(['message' => 'User assigned to task successfully.']);
+    }
+
+    public function unassignUser($taskId)
+    {
+        $task = Task::query()->findOrFail($taskId);
+        $task->assignee_id = null;
+        $task->save();
+
+        return response()->json(['message' => 'User unassigned from task successfully.']);
     }
 }
