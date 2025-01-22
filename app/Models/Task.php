@@ -9,7 +9,7 @@ class Task extends Model
 {
 //    use HasFactory;
 
-    protected $fillable = ['title', 'content', 'status_id', 'due_date', 'priority_id', 'board_id', 'assignee_id', 'user_id'];
+    protected $fillable = ['title', 'content', 'status_id', 'due_date', 'priority_id', 'board_id', 'assignee_id', 'creator_id'];
 
     public static function boot()
     {
@@ -33,6 +33,11 @@ class Task extends Model
     public function assignee()
     {
         return $this->belongsTo(User::class, 'assignee_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
     public function user()

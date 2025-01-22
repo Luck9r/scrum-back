@@ -29,6 +29,7 @@ class TaskController extends Controller
 //            'priority' => 'required',
             'board_id' => 'required|integer',
         ]);
+        $validated['creator_id'] = $request->user()->id;
 
         return Task::query()->create($validated);
     }
