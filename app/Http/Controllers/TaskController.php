@@ -30,6 +30,8 @@ class TaskController extends Controller
             'board_id' => 'required|integer',
         ]);
         $validated['creator_id'] = $request->user()->id;
+        // get the first status of the board
+        $validated['status_id'] = Board::query()->findOrFail($validated['board_id'])->statuses()->first()->id;
 
         return Task::query()->create($validated);
     }
@@ -39,15 +41,14 @@ class TaskController extends Controller
         $task = Task::query()->findOrFail($id);
 
         $validated = $request->validate([
-            'slug' => 'required|unique:tasks,slug,' . $task->id,
-            'title' => 'required',
-            'content' => 'required',
-            'status' => 'required',
-            'due_date' => 'required|date',
-            'priority' => 'required',
-            'board_id' => 'required|integer',
+            'title' => 'sometimes|required',
+            'content' => 'sometimes|required',
+            'due_date' => 'sometimes|required|date',
+            'assignee_id' => 'sometimes|required|integer',
+            'priority_id' => 'sometimes|required|integer',
+            'board_id' => 'sometimes|required|integer',
+            'status_id' => 'sometimes|required|integer',
         ]);
-
         $task->update($validated);
 
         return $task;
@@ -86,7 +87,9 @@ class TaskController extends Controller
             'content' => $task->content,
             'due_date' => $task->due_date,
             'priority' => $task->priority ? $task->priority->name : null,
+            'priority_id' => $task->priority_id,
             'status' => $task->status ? $task->status->name : null,
+            'status_id' => $task->status_id,
             'creator_name' => $task->creator ? $task->creator->name : null,
             'assignee_name' => $task->assignee ? $task->assignee->name : null,
             'creator_id' => $task->creator_id,
@@ -111,7 +114,10 @@ class TaskController extends Controller
                 'due_date' => $task->due_date,
                 'priority' => $task->priority ? $task->priority->name : null,
                 'status' => $task->status ? $task->status->name : null,
-                'user' => $task->user ? $task->user->name : null,
+                'creator_name' => $task->creator ? $task->creator->name : null,
+                'assignee_name' => $task->assignee ? $task->assignee->name : null,
+                'creator_id' => $task->creator_id,
+                'assignee_id' => $task->assignee_id,
                 'board_id' => $task->board_id,
             ];
         });

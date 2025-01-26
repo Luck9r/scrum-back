@@ -17,6 +17,8 @@ class Task extends Model
 
         static::creating(function ($task) {
             $task->slug = $task->generateSlug();
+            $firstPriority = Priority::query()->first();
+            $task->priority_id = $firstPriority->id;
         });
     }
 

@@ -10,8 +10,8 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user()->load('roles');
 });
 
-Route::apiResource('task', 'App\Http\Controllers\TaskController');
-Route::apiResource('board', 'App\Http\Controllers\BoardController');
+Route::apiResource('task', 'App\Http\Controllers\TaskController')->middleware('auth:sanctum');
+Route::apiResource('board', 'App\Http\Controllers\BoardController')->middleware('auth:sanctum');
 
 Route::get('/tasks', [TaskController::class, 'getTasksByUser'])
 ->middleware('auth:sanctum');
@@ -26,8 +26,11 @@ Route::get('/board/{boardId}', [BoardController::class, 'getBoard'])
 ->middleware('auth:sanctum');
 Route::get('/board/{boardId}/statuses', [BoardController::class, 'getStatusesByBoard'])
 ->middleware('auth:sanctum');
+Route::get('/board/{boardId}/users', [BoardController::class, 'getUsersByBoard'])
+    ->middleware('auth:sanctum');
+Route::get('/board/{boardId}/priorities', [BoardController::class, 'getPrioritiesByBoard'])
+    ->middleware('auth:sanctum');
 
-// list users
 Route::get('/users', function () {
     return \App\Models\User::all();
 })->middleware('auth:sanctum');

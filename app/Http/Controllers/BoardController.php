@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Board;
+use App\Models\Priority;
 use Illuminate\Http\Request;
 
 class BoardController extends Controller
@@ -33,10 +34,12 @@ class BoardController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required',
+            'title' => 'required|string|max:255',
         ]);
 
-        return Board::query()->create($validated);
+        $board = Board::create($validated);
+
+        return response()->json($board, 201);
     }
 
     public function update(Request $request, $id)
@@ -71,8 +74,25 @@ class BoardController extends Controller
     public function getStatusesByBoard($boardId)
     {
         $board = Board::query()->findOrFail($boardId);
-        $statuses = $board->tasks()->with('status')->get()->pluck('status')->unique('id');
+        $statuses = $board->statuses;
 
         return response()->json($statuses);
+    }
+
+    public function getUsersByBoard($boardId)
+    {
+        $board = Board::query()->findOrFail($boardId);
+        $users = $board->users;
+
+        return response()->json($users);
+    }
+
+    public function getPrioritiesByBoard($boardId)
+    {
+//        $board = Board::query()->findOrFail($boardId);
+//        $priorities = $board->priorities;
+        // for now priorities are common for all boards
+        $priorities = Priority::all();
+        return response()->json($priorities);
     }
 }
