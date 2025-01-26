@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Board;
 use App\Models\Priority;
+use App\Models\Status;
 use Illuminate\Http\Request;
 
 class BoardController extends Controller
@@ -69,6 +70,60 @@ class BoardController extends Controller
         $boards = $user->boards;
 
         return response()->json($boards);
+    }
+
+    public function updateStatus(Request $request, $boardId, $statusId)
+    {
+        $board = Board::query()->findOrFail($boardId);
+        $newStatusName = $request->input('status_name');
+
+        // Create the new status
+        $newStatus = Status::query()->create(['name' => $newStatusName]);
+
+        // Get the current order of the existing status
+        $currentOrder = $board->statuses()->where('status_id', $statusId)->first()->pivot->order;
+
+        // Detach the old status and attach the new status with the same order
+        $board->statuses()->detach($statusId);
+        $board->statuses()->attach($newStatus->id, ['order' => $currentOrder]);
+
+        // Reassign tasks from the old status to the new status
+        $tasks = $board->tasks()->where('status_id', $statusId)->get();
+        foreach ($tasks as $task) {
+            $task->status_id = $newStatus->id;
+            $task->save();
+        }
+
+        return response()->json(['message' => 'Status updated and tasks reassigned successfully.']);
+    }
+
+    public function addStatusToBoard(Request $request, $boardId)
+    {
+        $board = Board::query()->findOrFail($boardId);
+        $statusName = $request->input('status_name');
+
+        // Create the status if it doesn't already exist
+        $status = Status::query()->firstOrCreate(['name' => $statusName]);
+
+        // Get the current maximum order value for the board
+        $maxOrder = $board->statuses()->max('order');
+
+        // Attach the status to the board with the next order value
+        $board->statuses()->attach($status->id, ['order' => $maxOrder + 1]);
+
+        return response()->json(['message' => 'Status added to board with default order.']);
+    }
+
+    public function updateStatusOrder(Request $request, $boardId)
+    {
+        $board = Board::query()->findOrFail($boardId);
+        $statuses = $request->input('statuses');
+
+        foreach ($statuses as $order => $statusId) {
+            $board->statuses()->updateExistingPivot($statusId, ['order' => $order]);
+        }
+
+        return response()->json(['message' => 'Status order updated successfully.']);
     }
 
     public function getStatusesByBoard($boardId)

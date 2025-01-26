@@ -43,7 +43,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'sometimes|required',
             'content' => 'sometimes|required',
-            'due_date' => 'sometimes|required|date',
+            'due_date' => 'sometimes|nullable|date',
             'assignee_id' => 'sometimes|required|integer',
             'priority_id' => 'sometimes|required|integer',
             'board_id' => 'sometimes|required|integer',
@@ -113,7 +113,9 @@ class TaskController extends Controller
                 'content' => $task->content,
                 'due_date' => $task->due_date,
                 'priority' => $task->priority ? $task->priority->name : null,
+                'priority_id' => $task->priority_id,
                 'status' => $task->status ? $task->status->name : null,
+                'status_id' => $task->status_id,
                 'creator_name' => $task->creator ? $task->creator->name : null,
                 'assignee_name' => $task->assignee ? $task->assignee->name : null,
                 'creator_id' => $task->creator_id,

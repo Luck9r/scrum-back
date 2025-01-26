@@ -18,11 +18,11 @@ class Board extends Model
         parent::boot();
 
         static::created(function ($board) {
-            // Create default statuses
+            // Create default statuses with order
             $statuses = ['To Do', 'In Progress', 'QA', 'Done'];
-            foreach ($statuses as $statusName) {
+            foreach ($statuses as $index => $statusName) {
                 $status = Status::create(['name' => $statusName]);
-                $board->statuses()->attach($status->id);
+                $board->statuses()->attach($status->id, ['order' => $index + 1]);
             }
 
             // Assign the creator to the board
