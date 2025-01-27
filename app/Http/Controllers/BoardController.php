@@ -75,35 +75,20 @@ class BoardController extends Controller
     public function updateStatus(Request $request, $boardId, $statusId)
     {
         $board = Board::query()->findOrFail($boardId);
-        $newStatusName = $request->input('status_name');
+        $status = $board->statuses()->where('status_id', $statusId)->firstOrFail();
 
-        // Create the new status
-        $newStatus = Status::query()->create(['name' => $newStatusName]);
+        $status->update(['name' => $request->input('name')]);
 
-        // Get the current order of the existing status
-        $currentOrder = $board->statuses()->where('status_id', $statusId)->first()->pivot->order;
-
-        // Detach the old status and attach the new status with the same order
-        $board->statuses()->detach($statusId);
-        $board->statuses()->attach($newStatus->id, ['order' => $currentOrder]);
-
-        // Reassign tasks from the old status to the new status
-        $tasks = $board->tasks()->where('status_id', $statusId)->get();
-        foreach ($tasks as $task) {
-            $task->status_id = $newStatus->id;
-            $task->save();
-        }
-
-        return response()->json(['message' => 'Status updated and tasks reassigned successfully.']);
+        return response()->json(['message' => 'Status updated successfully.']);
     }
 
     public function addStatusToBoard(Request $request, $boardId)
     {
         $board = Board::query()->findOrFail($boardId);
-        $statusName = $request->input('status_name');
+        $statusName = $request->input('name');
 
-        // Create the status if it doesn't already exist
-        $status = Status::query()->firstOrCreate(['name' => $statusName]);
+        $status = Status::query()->create(['name' => $statusName]);
+
 
         // Get the current maximum order value for the board
         $maxOrder = $board->statuses()->max('order');
@@ -111,7 +96,27 @@ class BoardController extends Controller
         // Attach the status to the board with the next order value
         $board->statuses()->attach($status->id, ['order' => $maxOrder + 1]);
 
-        return response()->json(['message' => 'Status added to board with default order.']);
+        return response()->json($status);
+    }
+
+    public function destroyStatus($boardId, $statusId)
+    {
+        $board = Board::query()->findOrFail($boardId);
+        $status = $board->statuses()->where('status_id', $statusId)->firstOrFail();
+
+        // Find the first status of the board
+        $firstStatus = $board->statuses()->orderBy('order')->first();
+
+        // Reassign tasks associated with the status to the first status
+        $status->tasks()->update(['status_id' => $firstStatus->id]);
+
+        // Detach the status from the board
+        $board->statuses()->detach($statusId);
+
+        // Delete the status
+        $status->delete();
+
+        return response()->json(['message' => 'Status deleted and tasks reassigned successfully.']);
     }
 
     public function updateStatusOrder(Request $request, $boardId)
@@ -129,7 +134,7 @@ class BoardController extends Controller
     public function getStatusesByBoard($boardId)
     {
         $board = Board::query()->findOrFail($boardId);
-        $statuses = $board->statuses;
+        $statuses = $board->statuses()->orderBy('order')->get();
 
         return response()->json($statuses);
     }

@@ -19,20 +19,26 @@ Route::post('/task/{taskId}/assign-user', [TaskController::class, 'assignUser'])
 Route::post('/task/{taskId}/unassign-user', [TaskController::class, 'unassignUser'])
     ->middleware('auth:sanctum');
 Route::get('/tasks', [TaskController::class, 'getTasksByUser'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 Route::get('/tasks/{slug}', [TaskController::class, 'getTaskBySlug'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 
 Route::get('/boards', [BoardController::class, 'getBoardsByUser'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 Route::get('/board/{boardId}/tasks', [TaskController::class, 'getTasksByBoard'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 Route::get('/board/{boardId}', [BoardController::class, 'getBoard'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 Route::get('/board/{boardId}/statuses', [BoardController::class, 'getStatusesByBoard'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 Route::put('boards/{boardId}/statuses/order', [BoardController::class, 'updateStatusOrder'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
+Route::post('boards/{boardId}/statuses', [BoardController::class, 'addStatusToBoard'])
+    ->middleware('auth:sanctum');
+Route::put('boards/{boardId}/status/{statusId}', [BoardController::class, 'updateStatus'])
+    ->middleware('auth:sanctum');
+Route::delete('boards/{boardId}/status/{statusId}', [BoardController::class, 'destroyStatus'])
+    ->middleware('auth:sanctum');
 Route::get('/board/{boardId}/users', [BoardController::class, 'getUsersByBoard'])
     ->middleware('auth:sanctum');
 Route::get('/board/{boardId}/priorities', [BoardController::class, 'getPrioritiesByBoard'])
@@ -41,10 +47,8 @@ Route::post('/board/{boardId}/assign-user', [BoardUserController::class, 'assign
     ->middleware('auth:sanctum');
 Route::post('/board/{boardId}/unassign-user', [BoardUserController::class, 'unassignUser'])
     ->middleware('auth:sanctum');
-Route::put('boards/{boardId}/statuses/{statusId}', [BoardController::class, 'updateStatus'])
-    ->middleware('auth:sanctum');
-Route::post('boards/{boardId}/statuses', [BoardController::class, 'addStatusToBoard'])
-    ->middleware('auth:sanctum');
+
+
 
 Route::get('/users', function () {
     return \App\Models\User::all();
