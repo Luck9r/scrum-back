@@ -36,13 +36,42 @@ class TaskController extends Controller
         return Task::query()->create($validated);
     }
 
+    public function createTask(Request $request, $boardId)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+        $validated['creator_id'] = $request->user()->id;
+        $validated['board_id'] = $boardId;
+
+        $validated['status_id'] = Board::query()->findOrFail($boardId)->statuses()->orderBy('order')->first()->id;
+
+        $validated['priority_id'] = 1;
+
+        $task = Task::query()->create($validated);
+
+        $task->load('priority');
+
+        return response()->json([
+            'id' => $task->id,
+            'slug' => $task->slug,
+            'title' => $task->title,
+            'description' => $task->description,
+            'status_id' => $task->status_id,
+            'priority_id' => $task->priority_id,
+            'priority_name' => $task->priority ? $task->priority->name : null,
+            'creator_id' => $task->creator_id,
+            'board_id' => $task->board_id,
+        ], 201);
+    }
+
     public function update(Request $request, $id)
     {
         $task = Task::query()->findOrFail($id);
 
         $validated = $request->validate([
             'title' => 'sometimes|required',
-            'content' => 'sometimes|required',
+            'content' => 'sometimes',
             'due_date' => 'sometimes|nullable|date',
             'assignee_id' => 'sometimes|required|integer',
             'priority_id' => 'sometimes|required|integer',

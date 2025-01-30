@@ -27,6 +27,8 @@ Route::get('/boards', [BoardController::class, 'getBoardsByUser'])
     ->middleware('auth:sanctum');
 Route::get('/board/{boardId}/tasks', [TaskController::class, 'getTasksByBoard'])
     ->middleware('auth:sanctum');
+Route::post('/boards/{boardId}/tasks', [TaskController::class, 'createTask'])
+    ->middleware('auth:sanctum');
 Route::get('/board/{boardId}', [BoardController::class, 'getBoard'])
     ->middleware('auth:sanctum');
 Route::get('/board/{boardId}/statuses', [BoardController::class, 'getStatusesByBoard'])
