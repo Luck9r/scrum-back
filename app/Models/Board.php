@@ -50,4 +50,9 @@ class Board extends Model
         // for now priorities are common for all boards
         return Priority::all();
     }
+
+    public function meetings()
+    {
+        return $this->hasMany(Meeting::class);
+    }
 }

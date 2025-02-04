@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class TaskController extends Controller
 {
@@ -73,7 +74,7 @@ class TaskController extends Controller
             'title' => 'sometimes|required',
             'content' => 'sometimes',
             'due_date' => 'sometimes|nullable|date',
-            'assignee_id' => 'sometimes|required|integer',
+            'assignee_id' => 'sometimes',
             'priority_id' => 'sometimes|required|integer',
             'board_id' => 'sometimes|required|integer',
             'status_id' => 'sometimes|required|integer',
@@ -174,5 +175,23 @@ class TaskController extends Controller
         $task->save();
 
         return response()->json(['message' => 'User unassigned from task successfully.']);
+    }
+
+    public function delayTask(Request $request, $taskId)
+    {
+        $task = Task::query()->findOrFail($taskId);
+        $board = $task->board;
+        $users = $board->users;
+        $frontendUrl = config('app.frontend_url');
+        $taskUrl = "{$frontendUrl}/task/{$task->slug}";
+
+        foreach ($users as $user) {
+            Mail::raw("The assignee is unable to complete the task '{$task->slug} | {$task->title}' on time. You can view the task here: {$taskUrl}", function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Task Delay Notification');
+            });
+        }
+
+        return response()->json(['message' => 'Notification sent to all board users.']);
     }
 }
