@@ -16,6 +16,7 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->roles->pluck('name')->toArray(),
+                'boards' => $user->boards->pluck('title')->toArray(),
             ];
         });
     }
@@ -28,6 +29,7 @@ class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'roles' => $user->roles->pluck('name')->toArray(),
+            'boards' => $user->boards->pluck('title')->toArray(),
         ];
     }
 
